@@ -500,12 +500,12 @@
         <div class="winner-announcement" id="winnerAnnouncement" style="display: none;"></div>
     </div>
 
-    <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- QR Code Library - Using more reliable source -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script>
         // ============================================================================
@@ -513,23 +513,15 @@
         // ============================================================================
         // Get this from Firebase Console → Project Settings → Your apps → Firebase SDK snippet
         
-        // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyD7Vvv6mtVHGBcHde5LfATtJTwnvY7WFkI",
+        const FIREBASE_CONFIG = {
+            // REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG
+            apiKey: "AIzaSyD7Vvv6mtVHGBcHde5LfATtJTwnvY7WFkI",
   authDomain: "risk-management-game.firebaseapp.com",
   projectId: "risk-management-game",
   storageBucket: "risk-management-game.firebasestorage.app",
   messagingSenderId: "7285313359",
   appId: "1:7285313359:web:9d5c3b68e3a0df24747f3a"
-};
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
         };
 
         // Check if Firebase is configured
@@ -638,6 +630,8 @@ const app = initializeApp(firebaseConfig);
                 });
             }
 
+            console.log('Starting game with teams:', gameState.teams);
+
             // Save to Firebase
             gameRef.set({
                 sessionId: GAME_SESSION_ID,
@@ -645,14 +639,22 @@ const app = initializeApp(firebaseConfig);
                 phase: 'waiting',
                 teams: gameState.teams,
                 timestamp: Date.now()
+            }).then(() => {
+                console.log('Game state saved to Firebase');
+            }).catch((error) => {
+                console.error('Error saving to Firebase:', error);
+                alert('Error connecting to Firebase. Check console for details.');
             });
 
             // Show game screen
             document.getElementById('setupScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
 
-            // Generate QR code
-            generateQRCode();
+            // Generate QR code - with slight delay to ensure DOM is ready
+            console.log('Generating QR code...');
+            setTimeout(() => {
+                generateQRCode();
+            }, 100);
             
             // Initialize game board
             initializeGameBoard();
@@ -664,16 +666,69 @@ const app = initializeApp(firebaseConfig);
         }
 
         function generateQRCode() {
-            const studentUrl = window.location.href.replace('teacher.html', 'student.html') + '?session=' + GAME_SESSION_ID;
+            // Build the student URL - works whether this file is teacher.html or index.html
+            let baseUrl = window.location.href;
+            
+            // Remove teacher.html or index.html from the end
+            baseUrl = baseUrl.replace(/teacher\.html$/, '');
+            baseUrl = baseUrl.replace(/index\.html$/, '');
+            
+            // Ensure trailing slash
+            if (!baseUrl.endsWith('/')) {
+                baseUrl += '/';
+            }
+            
+            const studentUrl = baseUrl + 'student.html?session=' + GAME_SESSION_ID;
             document.getElementById('studentUrl').textContent = studentUrl;
             
-            new QRCode(document.getElementById('qrcode'), {
-                text: studentUrl,
-                width: 200,
-                height: 200,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-            });
+            console.log('Generated student URL:', studentUrl);
+            
+            // Clear any existing QR code
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            // Method 1: Try using QRCode library
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    new QRCode(qrContainer, {
+                        text: studentUrl,
+                        width: 256,
+                        height: 256,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    log('📱 QR code generated successfully!', 'success');
+                    return;
+                } catch (error) {
+                    console.error('QRCode library error:', error);
+                }
+            }
+            
+            // Method 2: Fallback to Google Charts API
+            console.log('Using fallback QR code generation');
+            const googleQRUrl = `https://chart.googleapis.com/chart?cht=qr&chs=256x256&chl=${encodeURIComponent(studentUrl)}`;
+            const img = document.createElement('img');
+            img.src = googleQRUrl;
+            img.style.width = '256px';
+            img.style.height = '256px';
+            img.style.border = '10px solid white';
+            img.style.borderRadius = '10px';
+            img.alt = 'QR Code for students to scan';
+            
+            img.onerror = function() {
+                // Method 3: If API also fails, show manual instructions
+                qrContainer.innerHTML = `
+                    <div style="background: white; padding: 30px; border-radius: 10px; color: #000; text-align: center; max-width: 300px;">
+                        <h3 style="color: #ff4444; margin-bottom: 15px;">⚠️ QR Code Generation Failed</h3>
+                        <p style="margin-bottom: 15px;">Students can manually type the URL shown above into their phone browser.</p>
+                        <p style="font-size: 0.9em; color: #666;">Or use an online QR code generator like qr-code-generator.com</p>
+                    </div>
+                `;
+            };
+            
+            qrContainer.appendChild(img);
+            log('📱 QR code generated using Google Charts API', 'success');
         }
 
         // ============================================================================
