@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Stability Baseline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #ffd700;
+        }
+
+        .game-code-display {
+            background: rgba(255,215,0,0.2);
+            border: 3px solid #ffd700;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-code-display h2 {
+            color: #ffd700;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .qr-section {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .url-display {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-family: monospace;
+            word-break: break-all;
+            max-width: 500px;
+        }
+
+        .setup-screen {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .setup-screen h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffd700;
+        }
+
+        .team-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .team-input-group {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .team-input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .team-input-group input,
+        .team-input-group select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .round-info {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .phase-indicator {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            border: 2px solid #ffd700;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 35px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .primary-btn {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .primary-btn:hover:not(:disabled) {
+            background: #ffed4e;
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background: #888;
+            color: #fff;
+        }
+
+        .danger-btn {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .team-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 3px solid transparent;
+        }
+
+        .team-section.has-students {
+            border-color: #44ff44;
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .team-name {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .team-department {
+            font-size: 0.9em;
+            color: #ffd700;
+        }
+
+        .students-online {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .students-online h4 {
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .student-pill {
+            display: inline-block;
+            background: rgba(68,255,68,0.3);
+            border: 1px solid #44ff44;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 3px;
+            font-size: 0.9em;
+        }
+
+        .budget-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .budget-item {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .budget-label {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .budget-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .risk-card {
+            background: rgba(0,0,0,0.4);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid #ffd700;
+            font-size: 0.95em;
+        }
+
+        .risk-card.mitigated {
+            border-left-color: #44ff44;
+            opacity: 0.7;
+        }
+
+        .risk-card.accepted {
+            border-left-color: #ff4444;
+        }
+
+        .decision-info {
+            font-size: 0.85em;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .log {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-left: 3px solid #ffd700;
+            padding-left: 10px;
+            font-size: 0.95em;
+        }
+
+        .log-entry.critical {
+            border-left-color: #ff4444;
+            background: rgba(255,68,68,0.2);
+        }
+
+        .log-entry.success {
+            border-left-color: #44ff44;
+            background: rgba(68,255,68,0.2);
+        }
+
+        .result-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .result-popup {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border: 5px solid #ffd700;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .result-popup h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+
+        .result-status {
+            font-size: 3em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .result-status.triggered {
+            color: #ff4444;
+            animation: shake 0.5s;
+        }
+
+        .result-status.safe {
+            color: #44ff44;
+            animation: bounce 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .winner-announcement {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid #ffd700;
+            text-align: center;
+            z-index: 3000;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 1200px) {
+            .game-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .team-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛠️ Teacher Dashboard</h1>
+            <div class="subtitle">Stability Baseline - Hazard Containment Doctrine</div>
+        </header>
+
+        <!-- Setup Screen -->
+        <div class="setup-screen" id="setupScreen">
+            <h2>🎮 Game Setup</h2>
+            
+            <div style="background: rgba(255,68,68,0.2); padding: 20px; border-radius: 10px; margin-bottom: 30px; border: 2px solid #ff4444;">
+                <h3 style="color: #ff4444; margin-bottom: 15px;">⚠️ FIREBASE CONFIGURATION REQUIRED</h3>
+                <p style="margin-bottom: 10px;">Before using this game, you must:</p>
+                <ol style="margin-left: 20px; line-height: 1.8;">
+                    <li>Create a Firebase project at <a href="https://console.firebase.google.com" target="_blank" style="color: #ffd700;">console.firebase.google.com</a></li>
+                    <li>Enable Realtime Database in "test mode"</li>
+                    <li>Copy your Firebase config</li>
+                    <li>Paste it into the FIREBASE_CONFIG section at the bottom of this HTML file</li>
+                </ol>
+                <p style="margin-top: 15px; color: #ffd700;">See the FIREBASE_SETUP_INSTRUCTIONS.md file for detailed steps!</p>
+            </div>
+
+            <label style="display: block; margin-bottom: 10px; font-size: 1.1em;">How many teams?</label>
+            <select id="teamCount" onchange="updateTeamInputs()" style="width: 100%; padding: 12px; font-size: 1.1em; border-radius: 5px; margin-bottom: 30px;">
+                <option value="2">2 Teams</option>
+                <option value="3">3 Teams</option>
+                <option value="4">4 Teams</option>
+                <option value="5">5 Teams</option>
+            </select>
+
+            <div class="team-inputs" id="teamInputs"></div>
+
+            <button class="primary-btn" onclick="startGame()" style="width: 100%; padding: 20px; font-size: 1.3em;">
+                🚀 Start Game & Generate QR Code
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" style="display: none;">
+            <!-- QR Code Display -->
+            <div class="game-code-display">
+                <h2>📱 Students: Scan to Join!</h2>
+                <div class="qr-section">
+                    <div id="qrcode"></div>
+                    <div>
+                        <div class="url-display" id="studentUrl">Loading...</div>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Or manually go to this URL</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Controls -->
+            <div class="controls">
+                <div class="round-info">🎯 Round: <span id="currentRound">1</span></div>
+                <div class="phase-indicator" id="phaseIndicator">Waiting for students to join...</div>
+                <div class="control-buttons">
+                    <button class="primary-btn" id="drawRisksBtn" onclick="drawRisks()">📋 Draw Risk Cards</button>
+                    <button class="primary-btn" id="triggerEventBtn" onclick="triggerEvents()" disabled>🎲 ROLL THE DICE!</button>
+                    <button class="secondary-btn" onclick="nextRound()">⏭️ Next Round</button>
+                    <button class="danger-btn" onclick="endGame()">🏁 End Game</button>
+                </div>
+            </div>
+
+            <!-- Team Display -->
+            <div class="game-board" id="gameBoard"></div>
+
+            <!-- Game Log -->
+            <div class="log">
+                <h3 style="margin-bottom: 10px;">📋 Game Log</h3>
+                <div id="gameLog"></div>
+            </div>
+        </div>
+
+        <!-- Result Popup -->
+        <div class="result-popup-overlay" id="resultPopupOverlay">
+            <div class="result-popup">
+                <h2 id="popupTeamName"></h2>
+                <div style="font-size: 1.5em; margin-bottom: 20px; color: #ffd700;" id="popupRiskName"></div>
+                <div class="result-status" id="popupResult"></div>
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 20px 0;" id="popupDetails"></div>
+                <button class="primary-btn" onclick="closeResultPopup()">Continue ➡️</button>
+            </div>
+        </div>
+
+        <!-- Winner Announcement -->
+        <div class="winner-announcement" id="winnerAnnouncement" style="display: none;"></div>
+    </div>
+
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ============================================================================
+        // 🔥 FIREBASE CONFIGURATION - PASTE YOUR CONFIG HERE
+        // ============================================================================
+        // Get this from Firebase Console → Project Settings → Your apps → Firebase SDK snippet
+        
+        // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD7Vvv6mtVHGBcHde5LfATtJTwnvY7WFkI",
+  authDomain: "risk-management-game.firebaseapp.com",
+  projectId: "risk-management-game",
+  storageBucket: "risk-management-game.firebasestorage.app",
+  messagingSenderId: "7285313359",
+  appId: "1:7285313359:web:9d5c3b68e3a0df24747f3a"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+        };
+
+        // Check if Firebase is configured
+        if (FIREBASE_CONFIG.apiKey === "YOUR_API_KEY_HERE") {
+            alert("⚠️ FIREBASE NOT CONFIGURED!\n\nPlease edit this HTML file and paste your Firebase config in the FIREBASE_CONFIG section.\n\nSee FIREBASE_SETUP_INSTRUCTIONS.md for details.");
+        }
+
+        // Initialize Firebase
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const database = firebase.database();
+        
+        // Generate unique game session ID
+        const GAME_SESSION_ID = 'game_' + Date.now();
+        const gameRef = database.ref('games/' + GAME_SESSION_ID);
+
+        // ============================================================================
+        // GAME DATA & CONSTANTS
+        // ============================================================================
+
+        const departmentTypes = [
+            "Life Support Systems",
+            "Data Infrastructure",
+            "Power Management",
+            "Environmental Controls",
+            "Communications Hub"
+        ];
+
+        // [Previous risk types array would go here - keeping it short for readability]
+        // Copy the full riskTypes array from the enhanced game
+
+        const riskTypes = [
+            // ... (copy all 25 risks from enhanced game)
+            {
+                name: "Data Corruption",
+                probability: 80,
+                description: "Critical database or storage system failure",
+                example: "Database crashes, 500 records corrupted",
+                mitigateExample: "Implement checksums and backups",
+                acceptExample: "Risk data loss and emergency recovery costs",
+                baseImpact: 15,
+                baseMitigation: 5,
+                impactType: "Critical: Lose MR",
+                weights: {
+                    "Life Support Systems": 1.2,
+                    "Data Infrastructure": 1.5,
+                    "Power Management": 0.8,
+                    "Environmental Controls": 1.0,
+                    "Communications Hub": 1.3
+                }
+            }
+            // Add remaining 24 risks here...
+        ];
+
+        let gameState = {
+            round: 1,
+            phase: 'setup',
+            teams: [],
+            currentRoundRisks: [],
+            studentConnections: {}
+        };
+
+        let resultQueue = [];
+
+        // ============================================================================
+        // SETUP FUNCTIONS
+        // ============================================================================
+
+        function updateTeamInputs() {
+            const count = parseInt(document.getElementById('teamCount').value);
+            const container = document.getElementById('teamInputs');
+            container.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div');
+                div.className = 'team-input-group';
+                div.innerHTML = `
+                    <label>Team ${i + 1}</label>
+                    <input type="text" id="teamName${i}" placeholder="Team Name" value="Team ${i + 1}">
+                    <select id="teamDept${i}">
+                        ${departmentTypes.map((dept, idx) => 
+                            `<option value="${dept}" ${i === idx ? 'selected' : ''}>${dept}</option>`
+                        ).join('')}
+                    </select>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function startGame() {
+            const count = parseInt(document.getElementById('teamCount').value);
+            gameState.teams = [];
+
+            for (let i = 0; i < count; i++) {
+                const name = document.getElementById(`teamName${i}`).value.trim() || `Team ${i + 1}`;
+                const department = document.getElementById(`teamDept${i}`).value;
+                gameState.teams.push({
+                    id: 'team_' + i,
+                    name: name,
+                    department: department,
+                    scope: 100,
+                    mr: 30,
+                    tpr: 100,
+                    risks: [],
+                    backlog: [],
+                    students: []
+                });
+            }
+
+            // Save to Firebase
+            gameRef.set({
+                sessionId: GAME_SESSION_ID,
+                round: gameState.round,
+                phase: 'waiting',
+                teams: gameState.teams,
+                timestamp: Date.now()
+            });
+
+            // Show game screen
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            // Generate QR code
+            generateQRCode();
+            
+            // Initialize game board
+            initializeGameBoard();
+            
+            // Listen for student connections
+            listenForStudents();
+            
+            log('🎮 Game started! Students can now scan QR code to join.', 'success');
+        }
+
+        function generateQRCode() {
+            const studentUrl = window.location.href.replace('teacher.html', 'student.html') + '?session=' + GAME_SESSION_ID;
+            document.getElementById('studentUrl').textContent = studentUrl;
+            
+            new QRCode(document.getElementById('qrcode'), {
+                text: studentUrl,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+            });
+        }
+
+        // ============================================================================
+        // FIREBASE LISTENERS
+        // ============================================================================
+
+        function listenForStudents() {
+            gameRef.child('students').on('value', (snapshot) => {
+                const students = snapshot.val() || {};
+                
+                // Update team student lists
+                gameState.teams.forEach(team => {
+                    team.students = [];
+                });
+                
+                Object.values(students).forEach(student => {
+                    const team = gameState.teams.find(t => t.id === student.teamId);
+                    if (team) {
+                        team.students.push(student.name);
+                    }
+                });
+                
+                updateGameBoard();
+            });
+
+            // Listen for student decisions
+            gameRef.child('decisions').on('child_added', (snapshot) => {
+                const decision = snapshot.val();
+                handleStudentDecision(decision);
+                snapshot.ref.remove(); // Clean up processed decision
+            });
+        }
+
+        function handleStudentDecision(decision) {
+            const team = gameState.teams.find(t => t.id === decision.teamId);
+            const risk = team.risks.find(r => r.id === decision.riskId);
+            
+            if (risk && risk.status === 'pending') {
+                if (decision.action === 'mitigate') {
+                    if (team.scope >= risk.mitigation) {
+                        team.scope -= risk.mitigation;
+                        risk.status = 'mitigated';
+                        risk.decidedBy = decision.studentName;
+                        team.backlog.push(`✓ Mitigated: ${risk.name} by ${decision.studentName}`);
+                        log(`✅ ${team.name}: ${decision.studentName} mitigated "${risk.name}"`, 'success');
+                    }
+                } else if (decision.action === 'accept') {
+                    risk.status = 'accepted';
+                    risk.decidedBy = decision.studentName;
+                    team.backlog.push(`⚠️ Accepted: ${risk.name} by ${decision.studentName}`);
+                    log(`⚠️ ${team.name}: ${decision.studentName} accepted "${risk.name}"`, 'normal');
+                }
+                
+                syncGameState();
+                updateGameBoard();
+            }
+        }
+
+        function syncGameState() {
+            gameRef.child('state').set({
+                round: gameState.round,
+                phase: gameState.phase,
+                teams: gameState.teams,
+                currentRoundRisks: gameState.currentRoundRisks,
+                timestamp: Date.now()
+            });
+        }
+
+        // ============================================================================
+        // GAME FUNCTIONS (simplified - add full implementations)
+        // ============================================================================
+
+        function initializeGameBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            
+            gameState.teams.forEach((team, index) => {
+                const section = document.createElement('div');
+                section.className = 'team-section';
+                section.id = `team-${index}`;
+                section.innerHTML = `
+                    <div class="team-header">
+                        <div>
+                            <div class="team-name">${team.name}</div>
+                            <div class="team-department">${team.department}</div>
+                        </div>
+                    </div>
+                    <div class="students-online" id="students-${index}">
+                        <h4>👥 Students Online:</h4>
+                        <div id="student-list-${index}">Waiting for students...</div>
+                    </div>
+                    <div class="budget-display">
+                        <div class="budget-item">
+                            <div class="budget-label">Known Scope</div>
+                            <div class="budget-value" id="scope-${index}">100</div>
+                        </div>
+                        <div class="budget-item">
+                            <div class="budget-label">Management Reserve</div>
+                            <div class="budget-value" id="mr-${index}">30</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px;">
+                        Test Pass Rate: <strong id="tpr-${index}">100%</strong>
+                    </div>
+                    <div id="risks-${index}" style="margin-top: 15px;"></div>
+                `;
+                board.appendChild(section);
+            });
+            
+            updateGameBoard();
+        }
+
+        function updateGameBoard() {
+            gameState.teams.forEach((team, index) => {
+                // Update student list
+                const studentList = document.getElementById(`student-list-${index}`);
+                if (team.students.length > 0) {
+                    studentList.innerHTML = team.students.map(s => 
+                        `<span class="student-pill">${s}</span>`
+                    ).join('');
+                    document.getElementById(`team-${index}`).classList.add('has-students');
+                } else {
+                    studentList.innerHTML = 'Waiting for students...';
+                }
+                
+                // Update budgets
+                document.getElementById(`scope-${index}`).textContent = team.scope;
+                document.getElementById(`mr-${index}`).textContent = team.mr;
+                document.getElementById(`tpr-${index}`).textContent = team.tpr + '%';
+                
+                // Update risks
+                displayRisks(index, team);
+            });
+        }
+
+        function displayRisks(index, team) {
+            const risksDiv = document.getElementById(`risks-${index}`);
+            if (team.risks.length === 0) {
+                risksDiv.innerHTML = '<p style="opacity: 0.7; text-align: center; padding: 20px;">No risks drawn yet</p>';
+                return;
+            }
+            
+            risksDiv.innerHTML = '<h4 style="color: #ffd700; margin-bottom: 10px;">🎲 Risk Register</h4>';
+            team.risks.forEach(risk => {
+                const card = document.createElement('div');
+                card.className = `risk-card ${risk.status}`;
+                card.innerHTML = `
+                    <strong>${risk.name}</strong> (${risk.probability}%)
+                    <div>Impact: ${Math.abs(risk.impact)} | Mitigation: ${risk.mitigation}</div>
+                    ${risk.decidedBy ? `<div class="decision-info">Decided by: ${risk.decidedBy}</div>` : ''}
+                    <div class="decision-info">${risk.status === 'mitigated' ? '✅ MITIGATED' : risk.status === 'accepted' ? '⚠️ ACCEPTED' : '⏳ Pending decision'}</div>
+                `;
+                risksDiv.appendChild(card);
+            });
+        }
+
+        function drawRisks() {
+            // Select 3 random risks
+            const selected = [];
+            const available = [...riskTypes];
+            for (let i = 0; i < 3; i++) {
+                const idx = Math.floor(Math.random() * available.length);
+                selected.push(available.splice(idx, 1)[0]);
+            }
+            
+            gameState.currentRoundRisks = selected;
+            
+            // Assign to all teams with weighting
+            gameState.teams.forEach(team => {
+                team.risks = selected.map(riskTemplate => {
+                    const weight = riskTemplate.weights[team.department] || 1.0;
+                    return {
+                        ...riskTemplate,
+                        id: 'risk_' + Date.now() + '_' + Math.random(),
+                        status: 'pending',
+                        impact: Math.round(riskTemplate.baseImpact * weight),
+                        mitigation: Math.round(riskTemplate.baseMitigation * weight)
+                    };
+                });
+            });
+            
+            gameState.phase = 'decision';
+            syncGameState();
+            updateGameBoard();
+            
+            log('📋 Risk cards drawn! Students can now make decisions on their phones.', 'success');
+            document.getElementById('phaseIndicator').textContent = '📍 Decision Phase - Students voting...';
+            document.getElementById('drawRisksBtn').disabled = true;
+            document.getElementById('triggerEventBtn').disabled = false;
+        }
+
+        function triggerEvents() {
+            // Process risks and create results (simplified)
+            log('🎲 Rolling dice for all accepted risks...', 'critical');
+            document.getElementById('triggerEventBtn').disabled = true;
+            
+            // Add full trigger logic here
+            // Show popups for each result
+            // Update Firebase
+        }
+
+        function nextRound() {
+            gameState.round++;
+            gameState.phase = 'waiting';
+            syncGameState();
+            document.getElementById('currentRound').textContent = gameState.round;
+            document.getElementById('drawRisksBtn').disabled = false;
+            log(`🆕 Round ${gameState.round} started!`, 'success');
+        }
+
+        function endGame() {
+            // Calculate and display winners
+            log('🏁 Game ended!', 'critical');
+        }
+
+        function closeResultPopup() {
+            document.getElementById('resultPopupOverlay').style.display = 'none';
+        }
+
+        function log(message, type = 'normal') {
+            const logDiv = document.getElementById('gameLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<strong>[Round ${gameState.round}]</strong> ${message}`;
+            logDiv.insertBefore(entry, logDiv.firstChild);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateTeamInputs();
+        };
+    </script>
+</body>
+</html>

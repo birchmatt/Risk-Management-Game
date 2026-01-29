@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Student Interface - Stability Baseline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: #ffd700;
+        }
+
+        /* Join Screen */
+        .join-screen {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .join-screen h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .join-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.3em;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .join-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .team-banner {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .team-banner h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .team-banner .department {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .status-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-card h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .budget-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .budget-item {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .budget-label {
+            font-size: 0.8em;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .budget-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .phase-indicator {
+            background: rgba(255,215,0,0.2);
+            border: 2px solid #ffd700;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .risk-section {
+            margin-bottom: 20px;
+        }
+
+        .risk-section h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .risk-card {
+            background: rgba(0,0,0,0.4);
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .risk-card.mitigated {
+            border-left-color: #44ff44;
+            opacity: 0.7;
+        }
+
+        .risk-card.accepted {
+            border-left-color: #ff4444;
+        }
+
+        .risk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .risk-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .risk-probability {
+            background: rgba(255,215,0,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-left: 10px;
+        }
+
+        .risk-details {
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .risk-details div {
+            margin-bottom: 5px;
+        }
+
+        .info-button {
+            background: rgba(68,68,255,0.3);
+            border: 1px solid #4444ff;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            width: 100%;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .info-button:active {
+            background: rgba(68,68,255,0.5);
+        }
+
+        .risk-description {
+            background: rgba(68,68,255,0.2);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .risk-description.show {
+            display: block;
+        }
+
+        .risk-description h4 {
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        .example-box {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 8px 0;
+            font-style: italic;
+        }
+
+        .decision-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .mitigate-btn {
+            padding: 15px;
+            background: #44ff44;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        .mitigate-btn:active {
+            background: #55ff55;
+            transform: scale(0.98);
+        }
+
+        .accept-btn {
+            padding: 15px;
+            background: #ff8844;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        .accept-btn:active {
+            background: #ff9955;
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: #666 !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .decision-status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .decision-status.mitigated {
+            background: rgba(68,255,68,0.3);
+            color: #44ff44;
+        }
+
+        .decision-status.accepted {
+            background: rgba(255,68,68,0.3);
+            color: #ff4444;
+        }
+
+        .decided-by {
+            font-size: 0.85em;
+            color: #aaa;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .waiting-message {
+            background: rgba(255,215,0,0.2);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #ffd700;
+        }
+
+        .waiting-message h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #ffd700;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border: 4px solid #ffd700;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            z-index: 1000;
+            max-width: 90%;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+        }
+
+        .result-popup.show {
+            display: block;
+        }
+
+        .result-popup h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .result-status {
+            font-size: 2.5em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .result-status.triggered {
+            color: #ff4444;
+        }
+
+        .result-status.safe {
+            color: #44ff44;
+        }
+
+        .error-message {
+            background: rgba(255,68,68,0.3);
+            border: 2px solid #ff4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 Student Interface</h1>
+            <div class="subtitle">Stability Baseline Game</div>
+        </header>
+
+        <!-- Join Screen -->
+        <div class="join-screen" id="joinScreen">
+            <h2>Join Your Team!</h2>
+            
+            <div class="form-group">
+                <label>Your Name:</label>
+                <input type="text" id="studentName" placeholder="Enter your name" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>Select Your Team:</label>
+                <select id="teamSelect">
+                    <option value="">Loading teams...</option>
+                </select>
+            </div>
+
+            <button class="join-btn" onclick="joinTeam()">🚀 Join Game!</button>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="team-banner">
+                <h2 id="teamName">Your Team</h2>
+                <div class="department" id="teamDepartment">Department</div>
+            </div>
+
+            <div class="phase-indicator" id="phaseIndicator">
+                Waiting for game to start...
+            </div>
+
+            <div class="status-card">
+                <h3>💰 Team Resources</h3>
+                <div class="budget-grid">
+                    <div class="budget-item">
+                        <div class="budget-label">Scope</div>
+                        <div class="budget-value" id="scopeValue">100</div>
+                    </div>
+                    <div class="budget-item">
+                        <div class="budget-label">Reserve</div>
+                        <div class="budget-value" id="mrValue">30</div>
+                    </div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                    TPR: <strong id="tprValue">100%</strong>
+                </div>
+            </div>
+
+            <div id="risksContainer"></div>
+
+            <div id="waitingContainer" style="display: none;">
+                <div class="waiting-message">
+                    <h3>⏳ Waiting...</h3>
+                    <div class="spinner"></div>
+                    <p id="waitingText">Waiting for teacher to draw risk cards</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Popup -->
+        <div class="result-popup" id="resultPopup">
+            <h2 id="resultRiskName"></h2>
+            <div class="result-status" id="resultStatus"></div>
+            <div id="resultDetails" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 15px 0;"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ============================================================================
+        // 🔥 FIREBASE CONFIGURATION - PASTE YOUR CONFIG HERE
+        // ============================================================================
+        // Must match the config in teacher.html
+        
+        const FIREBASE_CONFIG = {
+           apiKey: "AIzaSyD7Vvv6mtVHGBcHde5LfATtJTwnvY7WFkI",
+  authDomain: "risk-management-game.firebaseapp.com",
+  projectId: "risk-management-game",
+  storageBucket: "risk-management-game.firebasestorage.app",
+  messagingSenderId: "7285313359",
+  appId: "1:7285313359:web:9d5c3b68e3a0df24747f3a"
+        };
+
+        if (FIREBASE_CONFIG.apiKey === "YOUR_API_KEY_HERE") {
+            document.body.innerHTML = '<div style="padding: 40px; text-align: center; color: white;"><h1>⚠️ Firebase Not Configured</h1><p>Please contact your teacher - the game needs to be set up first!</p></div>';
+            throw new Error("Firebase not configured");
+        }
+
+        // Initialize Firebase
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const database = firebase.database();
+
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const SESSION_ID = urlParams.get('session');
+
+        if (!SESSION_ID) {
+            document.body.innerHTML = '<div style="padding: 40px; text-align: center; color: white;"><h1>⚠️ Invalid Link</h1><p>Please scan the QR code shown by your teacher!</p></div>';
+            throw new Error("No session ID");
+        }
+
+        const gameRef = database.ref('games/' + SESSION_ID);
+        
+        let myTeamId = null;
+        let myStudentId = null;
+        let myName = null;
+
+        // ============================================================================
+        // JOIN FUNCTIONS
+        // ============================================================================
+
+        // Load teams when page loads
+        gameRef.child('teams').once('value', (snapshot) => {
+            const teams = snapshot.val();
+            if (teams) {
+                const select = document.getElementById('teamSelect');
+                select.innerHTML = '<option value="">-- Choose Your Team --</option>';
+                teams.forEach((team, index) => {
+                    const option = document.createElement('option');
+                    option.value = team.id;
+                    option.textContent = team.name;
+                    select.appendChild(option);
+                });
+            }
+        });
+
+        function joinTeam() {
+            const name = document.getElementById('studentName').value.trim();
+            const teamId = document.getElementById('teamSelect').value;
+
+            if (!name) {
+                showError('Please enter your name!');
+                return;
+            }
+
+            if (!teamId) {
+                showError('Please select a team!');
+                return;
+            }
+
+            myName = name;
+            myTeamId = teamId;
+            myStudentId = 'student_' + Date.now();
+
+            // Register with Firebase
+            gameRef.child('students').child(myStudentId).set({
+                name: name,
+                teamId: teamId,
+                joinedAt: Date.now()
+            });
+
+            // Switch to game screen
+            document.getElementById('joinScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            // Start listening for game updates
+            listenToGameState();
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(() => errorDiv.classList.remove('show'), 3000);
+        }
+
+        // ============================================================================
+        // GAME STATE LISTENERS
+        // ============================================================================
+
+        function listenToGameState() {
+            gameRef.child('state').on('value', (snapshot) => {
+                const state = snapshot.val();
+                if (state) {
+                    updateGameDisplay(state);
+                }
+            });
+
+            // Listen for results
+            gameRef.child('results').on('child_added', (snapshot) => {
+                const result = snapshot.val();
+                if (result.teamId === myTeamId) {
+                    showResult(result);
+                }
+            });
+        }
+
+        function updateGameDisplay(state) {
+            // Find my team
+            const myTeam = state.teams.find(t => t.id === myTeamId);
+            if (!myTeam) return;
+
+            // Update team info
+            document.getElementById('teamName').textContent = myTeam.name;
+            document.getElementById('teamDepartment').textContent = myTeam.department;
+
+            // Update budgets
+            document.getElementById('scopeValue').textContent = myTeam.scope;
+            document.getElementById('mrValue').textContent = myTeam.mr;
+            document.getElementById('tprValue').textContent = myTeam.tpr + '%';
+
+            // Update phase
+            updatePhaseIndicator(state.phase);
+
+            // Update risks
+            if (myTeam.risks && myTeam.risks.length > 0) {
+                displayRisks(myTeam.risks);
+                document.getElementById('waitingContainer').style.display = 'none';
+            } else {
+                document.getElementById('risksContainer').innerHTML = '';
+                document.getElementById('waitingContainer').style.display = 'block';
+                document.getElementById('waitingText').textContent = 
+                    state.phase === 'waiting' ? 'Waiting for teacher to draw risk cards' : 'Waiting for next round';
+            }
+        }
+
+        function updatePhaseIndicator(phase) {
+            const indicator = document.getElementById('phaseIndicator');
+            const messages = {
+                'waiting': '⏳ Waiting for teacher...',
+                'decision': '🎯 Make Your Decisions!',
+                'results': '🎲 Rolling Dice...',
+                'ended': '🏁 Game Ended!'
+            };
+            indicator.textContent = messages[phase] || '⏳ Waiting...';
+        }
+
+        function displayRisks(risks) {
+            const container = document.getElementById('risksContainer');
+            container.innerHTML = '<div class="risk-section"><h3>🎲 Your Team\'s Risks</h3></div>';
+
+            risks.forEach(risk => {
+                const card = document.createElement('div');
+                card.className = `risk-card ${risk.status}`;
+                card.innerHTML = `
+                    <div class="risk-header">
+                        <div class="risk-name">${risk.name}</div>
+                        <div class="risk-probability">${risk.probability}%</div>
+                    </div>
+                    
+                    <div class="risk-details">
+                        <div>💥 Impact: ${Math.abs(risk.impact)} ${risk.impactType.includes('TPR') ? '% TPR' : 'Credits'}</div>
+                        <div>🛡️ Mitigation Cost: ${risk.mitigation} Scope Credits</div>
+                    </div>
+
+                    <button class="info-button" onclick="toggleInfo('${risk.id}')">
+                        ℹ️ Show Details & Examples
+                    </button>
+
+                    <div class="risk-description" id="info-${risk.id}">
+                        <h4>What is this risk?</h4>
+                        <p>${risk.description}</p>
+                        
+                        <div class="example-box">
+                            <strong>Example:</strong><br>
+                            ${risk.example}
+                        </div>
+                        
+                        <p><strong>If you MITIGATE:</strong> ${risk.mitigateExample}</p>
+                        <p><strong>If you ACCEPT:</strong> ${risk.acceptExample}</p>
+                        <p style="color: #ffd700; margin-top: 10px;"><strong>Your Department Impact:</strong> ${Math.abs(risk.impact)} (base: ${Math.abs(risk.baseImpact)})</p>
+                    </div>
+
+                    <div id="decision-${risk.id}">
+                        ${risk.status === 'pending' ? `
+                            <div class="decision-buttons">
+                                <button class="mitigate-btn" onclick="makeDecision('${risk.id}', 'mitigate')">
+                                    ✓ Mitigate<br><small>(-${risk.mitigation} Scope)</small>
+                                </button>
+                                <button class="accept-btn" onclick="makeDecision('${risk.id}', 'accept')">
+                                    ⚠️ Accept<br><small>(Take the risk)</small>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="decision-status ${risk.status}">
+                                ${risk.status === 'mitigated' ? '✅ MITIGATED' : '⚠️ RISK ACCEPTED'}
+                            </div>
+                            ${risk.decidedBy ? `<div class="decided-by">By: ${risk.decidedBy}</div>` : ''}
+                        `}
+                    </div>
+                `;
+                container.querySelector('.risk-section').appendChild(card);
+            });
+        }
+
+        function toggleInfo(riskId) {
+            const infoDiv = document.getElementById('info-' + riskId);
+            infoDiv.classList.toggle('show');
+        }
+
+        function makeDecision(riskId, action) {
+            // Send decision to Firebase
+            gameRef.child('decisions').push({
+                studentName: myName,
+                teamId: myTeamId,
+                riskId: riskId,
+                action: action,
+                timestamp: Date.now()
+            });
+
+            // Provide immediate feedback
+            const decisionsDiv = document.getElementById('decision-' + riskId);
+            decisionsDiv.innerHTML = `
+                <div class="decision-status" style="background: rgba(255,215,0,0.3);">
+                    ⏳ Decision submitted! Waiting for confirmation...
+                </div>
+            `;
+        }
+
+        function showResult(result) {
+            const popup = document.getElementById('resultPopup');
+            document.getElementById('resultRiskName').textContent = result.risk.name;
+            
+            const statusDiv = document.getElementById('resultStatus');
+            const detailsDiv = document.getElementById('resultDetails');
+            
+            if (result.triggered) {
+                statusDiv.textContent = '💥 TRIGGERED!';
+                statusDiv.className = 'result-status triggered';
+                detailsDiv.innerHTML = `
+                    <p><strong>Roll:</strong> ${result.roll} (needed ≤ ${result.risk.probability})</p>
+                    <p style="color: #ff4444; margin-top: 10px; font-weight: bold;">The risk occurred!</p>
+                    <p>Your team took damage from this risk.</p>
+                `;
+            } else {
+                statusDiv.textContent = '✅ SAFE!';
+                statusDiv.className = 'result-status safe';
+                detailsDiv.innerHTML = `
+                    <p><strong>Roll:</strong> ${result.roll} (needed ≤ ${result.risk.probability})</p>
+                    <p style="color: #44ff44; margin-top: 10px; font-weight: bold;">You dodged it!</p>
+                    <p>Your team is safe from this risk.</p>
+                `;
+            }
+            
+            popup.classList.add('show');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 5000);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (myStudentId) {
+                gameRef.child('students').child(myStudentId).remove();
+            }
+        });
+    </script>
+</body>
+</html>
